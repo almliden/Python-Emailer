@@ -8,7 +8,6 @@ class EmailAdapterConfig:
   port = 465
   account = None
   password = None
-  # domain = None
   server = None
 
 class EmailAdapter:
@@ -21,7 +20,6 @@ class EmailAdapter:
 
   def sendEmail(self, sender, receiver, subject, message, sender_text = None, content_type = None, sender_name=None):
     self.context = ssl.create_default_context()
-
     message_content = MIMEMultipart("text")
     message_content["From"] = sender if sender_name == None else '{sender_name} <{sender}>'.format(sender_name = sender_name, sender=sender)
     message_content["To"] = receiver
@@ -36,19 +34,6 @@ class EmailAdapter:
     message_content.attach(part)
     text = message_content.as_string()
 
-    # "hi {name}, you {result} your assignment".format(name="John", result="passed")
-
-    # headers=''
-    # if (content_type != None):
-    #   for k,v in content_type.items():
-    #     headers += ('\n%s: %s' % (k, v))
-    # message_text = ("""\
-    #   From: %s
-    #   To: %s %s
-    #   Subject: %s 
-
-    #   %s
-    #   """ % (sender, receiver, headers, subject, message))
     with smtplib.SMTP_SSL(self.config.server, self.config.port, context=self.context) as server:
       server.login(self.config.account, self.config.password)
       server.sendmail(sender, receiver, text)
@@ -74,6 +59,8 @@ class EmailAdapterConfigurator:
     self.config.server = parser.get('Email', 'EMAIL_SERVER', fallback = None)
     return self.config
 
+
+## Usage
 config = EmailAdapterConfigurator()
 emailAdapter = EmailAdapter(config.Config())
 
@@ -81,6 +68,4 @@ content_type = {
   'MIME-Version' : '1.0',
 }
 
-emailAdapter.sendEmail(sender = 'from@example.com', receiver = 'to@example.com', subject = 'Example', message = '<h1>Daily report</h1>', content_type=content_type, sender_name='Email Service')
-
-
+#emailAdapter.sendEmail(sender = 'from@example.com', receiver = 'to@example.com', subject = 'Example', message = '<h1>Daily report</h1>', content_type=content_type, sender_name='Email Service')
