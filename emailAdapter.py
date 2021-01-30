@@ -14,11 +14,17 @@ class EmailAdapter:
   config = EmailAdapterConfig
   context = None
 
-  def __init__(self, emailAdapterConfig=None):
-    if (emailAdapterConfig != None):
-      self.config = emailAdapterConfig
+  def __init__(self, email_adapter_config=None):
+    if (email_adapter_config != None):
+      self.config = email_adapter_config
+    else:
+      raise('You need to provide login details')
+    if (self.config.server == None or self.config.account == None or self.config.password == None):
+      raise('Not enough information to connect to server')
 
   def sendEmail(self, sender, receiver, subject, message, sender_text = None, content_type = None, sender_name=None):
+    if (self.config.server == None or self.config.account == None or self.config.password == None):
+      raise('Not enough information to connect to server')
     self.context = ssl.create_default_context()
     message_content = MIMEMultipart("text")
     message_content["From"] = sender if sender_name == None else '{sender_name} <{sender}>'.format(sender_name = sender_name, sender=sender)
@@ -40,32 +46,21 @@ class EmailAdapter:
 
 class EmailAdapterConfigurator:
   config = None
-  configName = None
+  config_name = None
 
-  def __init__(self, EmailAdapterConfig=None):
-    if (EmailAdapterConfig != None):
-      self.config = EmailAdapterConfig
-    self.configName = 'config.ini'
+  def __init__(self, email_adapter_config:EmailAdapterConfig=None):
+    if (email_adapter_config != None):
+      self.config = email_adapter_config
+    self.config_name = 'config.ini'
 
   def Config(self, fileName=None):
-    if not os.path.isfile(self.configName):
+    if not os.path.isfile(self.config_name):
       raise FileExistsError("Config file not found")
     parser=configparser.ConfigParser()
-    parser.read(self.configName)
+    parser.read(self.config_name)
     self.config = EmailAdapterConfig
     self.config.port = int(parser.get('Email', 'EMAIL_PORT', fallback = 465))
     self.config.account = parser.get('Email', 'EMAIL_ACCOUNT', fallback = None)
     self.config.password = parser.get('Email', 'EMAIL_PASSWORD', fallback = None)
     self.config.server = parser.get('Email', 'EMAIL_SERVER', fallback = None)
     return self.config
-
-
-## Usage
-config = EmailAdapterConfigurator()
-emailAdapter = EmailAdapter(config.Config())
-
-content_type = {
-  'MIME-Version' : '1.0',
-}
-
-#emailAdapter.sendEmail(sender = 'from@example.com', receiver = 'to@example.com', subject = 'Example', message = '<h1>Daily report</h1>', content_type=content_type, sender_name='Email Service')
