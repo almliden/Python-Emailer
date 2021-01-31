@@ -53,7 +53,7 @@ class EmailAdapterConfigurator:
       self.config = email_adapter_config
     self.config_name = 'config.ini'
 
-  def Config(self, fileName=None):
+  def Config(self, file_name=None):
     if not os.path.isfile(self.config_name):
       raise FileExistsError("Config file not found")
     parser=configparser.ConfigParser()
